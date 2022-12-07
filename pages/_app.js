@@ -10,7 +10,6 @@ function MyApp({ Component, pageProps }) {
     useEffect(() => {
         const isLoggedIn = async () => await magic.user.isLoggedIn()
         isLoggedIn().then((isLogged) => {
-            console.log(isLogged)
             if (!isLogged) {
                 router.push('/login')
             } else {
@@ -32,7 +31,7 @@ function MyApp({ Component, pageProps }) {
     }, [router])
 
     if (isLoading) {
-        return <Loader/>
+        return <Loader />
     }
 
     return <Component {...pageProps} />

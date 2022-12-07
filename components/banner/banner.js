@@ -2,9 +2,13 @@ import styles from './banner.module.css'
 
 import React, { useCallback } from 'react'
 import Image from 'next/image'
+import { useRouter } from 'next/router'
 
-const Banner = ({ imgUrl, title, subTitle }) => {
-    const handleOnPlay = useCallback(() => {}, [])
+const Banner = ({ imgUrl, title, subTitle, videoId }) => {
+    const router = useRouter()
+    const handleOnPlay = useCallback(() => {
+        router.push(`/video/${videoId}`)
+    }, [])
 
     return (
         <div className={styles.container}>
@@ -25,7 +29,7 @@ const Banner = ({ imgUrl, title, subTitle }) => {
                             <Image
                                 alt="play button"
                                 src={'/static/play.svg'}
-                                width='32'
+                                width="32"
                                 height="32"
                             />
                             <span className={styles.playText}>Play</span>

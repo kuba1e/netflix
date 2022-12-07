@@ -4,6 +4,7 @@ import Banner from '../components/banner'
 import Navbar from '../components/nav'
 import SectionCards from '../components/section-cards'
 import { getPopularVideos, getVideos } from '../lib/videos'
+import { queryHasuraGQL } from '../lib/db/hasura'
 
 export async function getServerSideProps() {
     const disneyVideos = await getVideos({ searchQuery: 'disney trailer' })
@@ -24,11 +25,14 @@ export async function getServerSideProps() {
 }
 
 export default function Home({
-    disneyVideos,
-    productivityVideos,
-    travelVideos,
-    popularVideos,
+    disneyVideos = [],
+    productivityVideos = [],
+    travelVideos = [],
+    popularVideos = [],
 }) {
+
+    queryHasuraGQL()
+
     return (
         <div className={styles.container}>
             <Head>
@@ -45,6 +49,7 @@ export default function Home({
                     title="Kill Bill"
                     subTitle="Awesome movie"
                     imgUrl="/static/banner.png"
+                    videoId="mYfJxlgR2jw"
                 />
                 <div className={styles.sectionWrapper}>
                     <SectionCards
