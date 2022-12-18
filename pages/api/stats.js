@@ -3,7 +3,7 @@ import { decodeToken } from '../../lib/utils'
 
 export default async function stats(req, res) {
     try {
-        const token = req.cookies.token
+        const token = req.cookies.get('token')
         const { videoId } = req.query
         if (!token) {
             res.status(403).send({})
