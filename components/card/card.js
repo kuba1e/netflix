@@ -4,7 +4,12 @@ import styles from './card.module.css'
 import { motion } from 'framer-motion'
 import cls from 'classnames'
 
-const Card = ({ imgUrl, size = 'medium', idx }) => {
+const Card = ({
+    imgUrl,
+    size = 'medium',
+    withCustomAnimation,
+    shouldScale = true,
+}) => {
     const [imgSrc, setImgSrc] = useState(imgUrl)
 
     const handleOnImgError = useCallback(() => {
@@ -19,12 +24,12 @@ const Card = ({ imgUrl, size = 'medium', idx }) => {
         small: styles.smItem,
     }
 
-    const scale = idx === 0 ? { scaleY: 1.1 } : { scale: 1.1 }
+    const scale = withCustomAnimation ? { scaleY: 1.1 } : { scale: 1.1 }
 
     return (
         <div className={styles.container}>
             <motion.div
-                whileHover={scale}
+                {...(shouldScale ? { whileHover: scale } : {})}
                 className={cls(styles.imgMotionWrapper, classMap[size])}
             >
                 <Image

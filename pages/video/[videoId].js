@@ -5,12 +5,13 @@ import ReactModal from 'react-modal'
 import Navbar from '../../components/nav/navbar'
 import styles from '../../styles/Video.module.css'
 import { getYoutubeVideoById } from '../../lib/videos'
+import { Dislike, Like } from '../../components/icons'
+import { useCallback, useEffect, useState } from 'react'
 
 ReactModal.setAppElement('#__next')
 
 export async function getStaticProps({ params }) {
     const videoInfo = await getYoutubeVideoById(params.videoId)
-
     return {
         props: { video: videoInfo.length > 0 ? videoInfo[0] : {} },
         revalidate: 10,
@@ -33,6 +34,55 @@ export async function getStaticPaths() {
 function Video({ video }) {
     const router = useRouter()
 
+    const videoId = router.query.videoId
+
+    const [toggleLike, setToggleLike] = useState(false)
+    const [toggleDislike, setToggleDislike] = useState(false)
+
+    useEffect(() => {
+        const getVideoFavourited = async (videoId) => {
+            const response = await fetch(`/api/stats?videoId=${videoId}`)
+            return await response.json()
+        }
+        getVideoFavourited(videoId).then(({ data = {} }) => {
+            const favourited = data[0]?.favourited
+            if (favourited === 1) {
+                setToggleLike(true)
+            } else if (favourited === 0) {
+                setToggleDislike(true)
+            }
+        })
+    }, [videoId])
+
+    const runRatingService = useCallback(
+        async (favourited) => {
+            await fetch(`/api/stats?videoId=${videoId}`, {
+                method: 'POST',
+                body: JSON.stringify({ favourited }),
+            })
+        },
+        [videoId]
+    )
+
+    const handleToggleLike = useCallback(async () => {
+        const val = !toggleLike
+        setToggleLike(val)
+        toggleDislike && setToggleDislike(false)
+
+        const favourited = val ? 1 : 0
+
+        runRatingService(favourited)
+    }, [toggleDislike, toggleLike, runRatingService])
+
+    const handleToggleDislike = useCallback(async () => {
+        const val = !toggleDislike
+
+        setToggleDislike(val)
+        toggleLike && setToggleLike(false)
+        const favourited = val ? 0 : 1
+        runRatingService(favourited)
+    }, [toggleLike, toggleDislike, runRatingService])
+
     const {
         title,
         publishTime,
@@ -43,8 +93,7 @@ function Video({ video }) {
 
     return (
         <div>
-
-            <Navbar/>
+            <Navbar />
             <ReactModal
                 isOpen={true}
                 contentLabel="Watch the video"
@@ -58,9 +107,26 @@ function Video({ video }) {
                     type="text/html"
                     width="100%"
                     height="360"
-                    src={`https://www.youtube.com/embed/${router.query.videoId}?autoplay=0&origin=http://example.com&controls=0&rel=1`}
+                    src={`https://www.youtube.com/embed/${videoId}?autoplay=0&origin=http://example.com&controls=0&rel=1`}
                     frameBorder="0"
                 ></iframe>
+                <div className={styles.likeDislikeBtnWrapper}>
+                    <button onClick={handleToggleLike}>
+                        <div
+                            className={clsx(
+                                styles.btnWrapper,
+                                styles.likeBtnWrapper
+                            )}
+                        >
+                            <Like selected={toggleLike} />
+                        </div>
+                    </button>
+                    <button onClick={handleToggleDislike}>
+                        <div className={styles.btnWrapper}>
+                            <Dislike selected={toggleDislike} />
+                        </div>
+                    </button>
+                </div>
                 <div className={styles.modalBody}>
                     <div className={styles.modalBodyContent}>
                         <div className={styles.col1}>

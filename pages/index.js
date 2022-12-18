@@ -3,16 +3,31 @@ import styles from '../styles/Home.module.css'
 import Banner from '../components/banner'
 import Navbar from '../components/nav'
 import SectionCards from '../components/section-cards'
-import { getPopularVideos, getVideos } from '../lib/videos'
-import { queryHasuraGQL } from '../lib/db/hasura'
+import {
+    getPopularVideos,
+    getVideos,
+    getWatchedAgainVideos,
+} from '../lib/videos'
+import { redirectUser } from '../utils/redirectUser'
 
-export async function getServerSideProps() {
+export async function getServerSideProps(context) {
+    const { userId, token } = await redirectUser(context)
+    if (!userId) {
+        return {
+            props: {},
+            redirect: {
+                destination: '/login',
+                permanent: false,
+            },
+        }
+    }
     const disneyVideos = await getVideos({ searchQuery: 'disney trailer' })
     const productivityVideos = await getVideos({
         searchQuery: 'productivity',
     })
     const travelVideos = await getVideos({ searchQuery: 'indie music' })
     const popularVideos = await getPopularVideos()
+    const watchItAgainVideos = await getWatchedAgainVideos(token, userId)
 
     return {
         props: {
@@ -20,6 +35,7 @@ export async function getServerSideProps() {
             productivityVideos,
             travelVideos,
             popularVideos,
+            watchItAgainVideos,
         },
     }
 }
@@ -29,10 +45,8 @@ export default function Home({
     productivityVideos = [],
     travelVideos = [],
     popularVideos = [],
+    watchItAgainVideos = [],
 }) {
-
-    queryHasuraGQL()
-
     return (
         <div className={styles.container}>
             <Head>
@@ -56,6 +70,11 @@ export default function Home({
                         title="Disney"
                         videos={disneyVideos}
                         size="large"
+                    />
+                    <SectionCards
+                        title="Watch it again"
+                        videos={watchItAgainVideos}
+                        size="small"
                     />
                     <SectionCards
                         title="Travel"

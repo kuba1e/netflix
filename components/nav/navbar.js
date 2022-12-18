@@ -8,6 +8,7 @@ import styles from './navbar.module.css'
 const Navbar = () => {
     const router = useRouter()
     const [username, setUsername] = useState('')
+    const [didToken, setDidToken] = useState('')
 
     const [shodDropdown, setShowDropdown] = useState(false)
 
@@ -15,6 +16,8 @@ const Navbar = () => {
         const getUser = async () => {
             try {
                 const { email } = await magic.user.getMetadata()
+                const didToken = await magic.user.getIdToken()
+                setDidToken(didToken)
                 setUsername(email)
             } catch (error) {}
         }
@@ -29,26 +32,34 @@ const Navbar = () => {
         [router]
     )
 
-    const handleOnClickMyList = useCallback(() => {}, [])
+    const handleOnClickMyList = useCallback((e) => {
+        e.preventDefault()
+        router.push('/browse/my-list')
+    }, [])
 
     const handleShowDropdown = useCallback((e) => {
         e.preventDefault()
         setShowDropdown((prevState) => !prevState)
     }, [])
 
-    const handleSignOut = useCallback(
-        async (e) => {
-            e.preventDefault()
-            try {
-                await magic.user.logout()
-            } catch (error) {
-            } finally {
-                router.push('/login')
-            }
-        },
-        [router]
-    )
+    const handleSignOut = async (e) => {
+        e.preventDefault()
 
+        try {
+            const response = await fetch('/api/logout', {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${didToken}`,
+                    'Content-Type': 'application/json',
+                },
+            })
+
+            const res = await response.json()
+        } catch (error) {
+            console.error('Error logging out', error)
+            router.push('/login')
+        }
+    }
     return (
         <div className={styles.container}>
             <div className={styles.wrapper}>
@@ -57,9 +68,9 @@ const Navbar = () => {
                         <div className={styles.logoWrapper}>
                             <Image
                                 src="/static/netflix.svg"
-                                width="126"
-                                height="38"
                                 alt="Netflix logo"
+                                width="128"
+                                height="34"
                             />
                         </div>
                     </Link>

@@ -8,7 +8,7 @@ const Banner = ({ imgUrl, title, subTitle, videoId }) => {
     const router = useRouter()
     const handleOnPlay = useCallback(() => {
         router.push(`/video/${videoId}`)
-    }, [])
+    }, [videoId, router])
 
     return (
         <div className={styles.container}>
