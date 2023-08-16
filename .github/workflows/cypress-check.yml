@@ -21,7 +21,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: build
-          path: ./netflix/build
+          path: netflix/build
           if-no-files-found: error
   cypress-run:
     runs-on: ubuntu-latest
