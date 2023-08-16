@@ -20,8 +20,9 @@ jobs:
       - name: Save build folder
         uses: actions/upload-artifact@v3
         with:
-          name: build
-          path: netflix/build
+          name: bundle
+          path: netflix
+          if-no-files-found: error
   cypress-run:
     runs-on: ubuntu-latest
     # Runs tests in parallel with matrix strategy https://docs.cypress.io/guides/guides/parallelization
